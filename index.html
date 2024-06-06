@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+        <title>AnimeRec</title>
+        <link rel="stylesheet" href="css/virtual-select.min.css">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <script src="https://kit.fontawesome.com/42d5989152.js" crossorigin="anonymous"></script>
+
+
+
+
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+
+
+    <body>
+        <!-- Navbar -->
+        <nav class="navbar navbar-default">
+            <div class="container">
+                <div class="navbar-header">
+                    <h3>AnimeRec</h3>
+                </div>
+            </div>
+        </nav>
+        <!-- Search bar -->
+        <div class="container">
+           <div class="jumbotron" id="search-jumbo">
+               <form id="TitleForm">
+                   <input autocomplete="off" type="text" class="form-control" id="titleText" placeholder="Enter an Anime Title...">
+                   <ul class="suggestions">
+
+                  </ul>
+               </form>
+               <div>
+                <select id="multi_option" multiple name="native-select" placeholder="Select Grenres to search by..." data-silent-initial-value-set="false">
+
+                </select>
+
+            <script type="text/javascript" src="js/virtual-select.min.js"></script>
+            <script type="text/javascript">
+                VirtualSelect.init({
+                    ele: '#multi_option'
+                });
+            </script>
+
+               <button class ="genreSearchButton" id ="genreClick">Search by Genre</button>
+             </div>
+           </div>
+       </div>
+       <div class="genreSearch" id="genreSearch"></div>
+        <div class="noResult" id="noResult">
+
+        </div>
+       <p id="no-listings" class="no-listings">Find your anime by searching!</p>
+       <!-- Populated animes -->
+       <div class="container">
+           <div id="movies" class="row">
+           </div>
+       </div>
+
+       <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+       <!-- Axios -->
+       <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+       <!-- Main JS -->
+       <script src="js/main.js"></script>
+        <!-- GenreForm JS -->
+        <script src="js/genreForm.js"></script>
+    </body>
+</html>
