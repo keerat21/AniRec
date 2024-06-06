@@ -1,359 +1,303 @@
-// Main JavaScript bruh
+// Main JavaScript and funtions
 
-const apiKey = '8c565e9a';
-randomTry = 0;
+// REFERENCE: https://github.com/lukes-code/imdbApi
+
+//Loads Home page NeuvoRec
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+let genreOut = '';
+$('#genreSearch').removeClass('genreSearch');
+
+// initial page load
+$('#noResult').removeClass('noResult');
+        //search anime list; Fetch using JIKAN_V3 API; call animeList function 
+        fetch(`https://api.jikan.moe/v4/anime?q=&page=1&sfw=1&order_by=popularity`)
+        .then(res=>res.json())
+        .then(animeList)
+        .catch(err=>console.warn(err.message));
+
+//all the events are here 
 $(document).ready(() => {
 
     //Get search input
-    $('#searchForm').on('keyup', (e) => {
-        let searchText = $('#searchText').val();
-        getMovies(searchText);
-        e.preventDefault();
-    });
+//searches the title bar ON KEYUP
+$('#TitleForm').on('keyup', (e) => {
+  $('#genreSearch').removeClass('genreSearch');
+  let titleText = $('#titleText').val();
+  getAnimes(titleText);
+  //console.log('object mal_id: '+document.querySelector('#multi_option').value); //check mal ids in console
 
-    $('#searchForm').on('submit', (e) => {
-        let searchText = $('#searchText').val();
-        getMovies(searchText);
-        e.preventDefault();
-    });
+  e.preventDefault();
 
-    //My favourites
-    $('.myFavourites').click(function() {
-        //Remove quote
-        let films_deserialized = JSON.parse(localStorage.getItem('films'));
-        // alert(films);
-        var i;
-        let output = '';
-        
-        //Loop through favourites
-        if(films.length > 0){
+});
 
-            $('#no-listings').text('');
-            $('#no-listings').removeClass('no-listings');
-            $('#theForce').addClass('hide');
-            $('#noResult').removeClass('noResult');
+// search by genre event on click
+$('#genreClick').on('click', (e) => {
+    //#mult_optionis the genre search id; getting value from it
+  let gID = $('#multi_option').val();
 
-            for(i = 0; i < films.length; i++){
-                axios.get('https://www.omdbapi.com?apiKey=' + apiKey + '&s=' + films[i])
-                .then((response) => {
-                    let movies = response.data.Search[0];
-                        // if(movies.Poster == 'N/A'){
-                        //     movies.Poster == '../img/comingsoon.jpg';
-                        // }
-                        output += `
-                            <div class="col-md-3 col-sm-6 col-6 movie-listing">
-                                <a onclick="movieSelected('${movies.imdbID}')" href="#" id="goToMovie">
-                                    <div class="well text-center">
-                                        <img src="${movies.Poster}" alt="${movies.Title}"/>
-                                        <div class="middle">
-                                          <h6 class="search-title">${movies.Title}</h5>
-                                         <p class="search-year">Released: ${movies.Year}</h5>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        `;
-                    $('#movies').html(output);
-                    console.log(response);
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-            }
-        } else {
-            let output = 'Hm, no favourites. How sad';
-            $('#no-listings').text(output);
-            $('#no-listings').addClass('no-listings');
-            $('#theForce').removeClass('hide');
-            $('#theForce').attr('src', 'img/not-found.svg');
-            $('#noResult').addClass('noResult');
-            $('#movies').html('');
-        }
-    });
+  // search with given genres NOTE:Limited
+  APIsearchByGenres(gID);
+  console.log('GID:'+gID); //get genreIDS on console
+  e.preventDefault();
+});
 
-    //Lukes favourites
-    $('.favourites').click(function(e) {
-        //Remove quote
+
+});
+
+//search by genre; Fetch using JIKAN_V3 API;  API using GenreIDS 
+function APIsearchByGenres(gList){
+  fetch(`https://api.jikan.moe/v4/anime?q=&page=1&sfw=1&order_by=popularity&genres=${gList}`)
+  .then(res=>res.json())
+  .then(data=>{
+    if (data.data.length>0)
+        animeList(data)
+    else 
+        animeListCheck(gList)
+
+  })
+  .catch(err=>console.warn(err.message));
+
+}
+
+
+
+//This is the URL for the API we found that makes the MyAnimeList website searchable
+const base_url = "https://api.jikan.moe/v4/";
+
+//Receive titleText on KEYUP event
+function getAnimes(titleText){
+    // console.log(titleText);
+            $('#genreSearch').hide();
+
+
+//MyAnimeList does not let queries of less than 3 search
+    if(titleText.length > 2){
+
+
+
         $('#no-listings').text('');
         $('#no-listings').removeClass('no-listings');
-        $('#theForce').addClass('hide');
         $('#noResult').removeClass('noResult');
-        //Set hard coded favouites to find
-        films = ['Joker', 'Halloween', 'Deadpool', 'The Walking Dead'];
-        var i;
+////////////////////////////////////
+
+        const query = titleText;
+
+
+        //search anime list; Fetch using JIKAN_V3 API; call animeList function 
+        fetch(`https://api.jikan.moe/v4/anime?q=${query}&page=1&sfw=1&order_by=popularity`)
+        .then(res=>res.json())
+        .then(animeList)
+        .catch(err=>console.warn(err.message));
+
+
+
+///////////////////////////////////////
+
+    } else if(titleText.length < 1){
+        film = 'Find an Anime!!!';
         let output = '';
-        //Loop through favourites
-        for(i = 0; i < films.length; i++){
-            axios.get('https://www.omdbapi.com?apiKey=' + apiKey + '&s=' + films[i])
-            .then((response) => {
-                let movies = response.data.Search[0];
-                    output += `
-                        <div class="col-md-3 movie-listing">
-                            <a onclick="movieSelected('${movies.imdbID}')" href="#" id="goToMovie">
-                                <div class="well text-center">
-                                    <img src="${movies.Poster}" alt="${movies.Title}"/>
-                                    <div class="middle">
-                                        <h6 class="search-title">${movies.Title}</h5>
-                                        <p class="search-year">Released: ${movies.Year}</h5>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    `;
-                $('#movies').html(output);
-                console.log(response);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-        }
-    });
-});
-
-
-
-function getMovies(searchText){
-    // console.log(searchText);
-
-    let film = 'Hm, can\'t find a movie with that name';
-
-    if(searchText.length > 2){
-        axios.get('https://www.omdbapi.com?apiKey=' + apiKey + '&s=' + searchText)
-        .then((response) => {
-            let movies = response.data.Search;
-            let output = '';
-            
-            if(response.data.Response == 'False'){
-                $('#theForce').attr('src', 'img/not-found.svg');
-                $('#theForce').removeClass('hide');
-                $('#no-listings').addClass('no-listings');
-                $('#no-listings').text(film);
-                $('#noResult').addClass('noResult');
-                console.log(film);
-            } else{
-                $('#theForce').addClass('hide');
-                $('#no-listings').text('');
-                $('#no-listings').removeClass('no-listings');
-                $('#noResult').removeClass('noResult');
-                $.each(movies, (index, movie) => {
-                    
-                    isFavourite = films.includes(`${movie.Title}`);
-                    // alert('is the title in the array? : ' + isFavourite);
-                    if(`${movie.Poster}` == 'N/A'){
-                        movie.Poster = 'img/comingsoon.jpg';
-                     }
-                    output += `
-                        <div class="col-md-3 col-sm-6 col-6 movie-listing">
-                            <div class="well text-center">
-                                <a onclick="movieSelected('${movie.imdbID}')" href="#" id="goToMovie"><img id="moviePoster" src="${movie.Poster}" alt="${movie.Title}"/></a>
-                                <div class="middle">
-                                    <h6 class="search-title">${movie.Title}</h6>
-                                    <p class="search-year">Released: ${movie.Year}</p>
-                    `;
-                    if(isFavourite == true){
-                        output += `
-                                    <div class="delegatedFave"><i class="fas fa-star" id="checked"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    } else {
-                        output += `
-                                    <div class="delegatedFave"><i class="far fa-star" id="not-checked"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    }
-                });
-            }
-           
-
-            $('#movies').html(output);
-            console.log(response);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-    } else if(searchText.length < 1){
-        let film = 'Find your favourite movie by searching!';
-        let output = '';
-        $('#theForce').attr('src', 'img/the-force.svg');
-        $('#theForce').removeClass('hide');
         $('#no-listings').addClass('no-listings');
         $('#no-listings').text(film);
         $('#movies').html(output);
         $('#noResult').addClass('noResult');
     } else{
-        let film = 'No films here, search to find your favourites!';
+        film = 'Find an Anime by typing more letters!';
         let output = '';
-        $('#theForce').attr('src', 'img/the-force.svg');
-        $('#theForce').removeClass('hide');
         $('#no-listings').addClass('no-listings');
         $('#no-listings').text(film);
         $('#movies').html(output);
         $('#noResult').addClass('noResult');
     }
-    
+
 }
 
-function movieSelected(id){
-    sessionStorage.setItem('movieId', id);
-    window.location = 'movie.html';
-    return false;
+function animeListCheck(list){
+    if (list.length < 2)
+        return;
+    APIsearchByGenres(list.slice(0,-2));
+
 }
+//receive fetch response objects(Anime Data)
+function animeList(data){
+console.log(data);
+  //hold array of anime ids
+  let output = '';
+  let mal_ids = [];
+  // console.log('here '+data); //
 
-function getMovie(){
-    let movieId = sessionStorage.getItem('movieId');
-    axios.get('https://www.omdbapi.com?apiKey=' + apiKey + '&i=' + movieId)
-        .then((response) => {
-            console.log(response);
-            let movie = response.data;
-            let output = `
-                <div class="row">
-                    <div class="col-md-4">
-                        <img src="${movie.Poster}" alt="${movie.Title}" id="specificPage" class="thumbnail"/>
-                    </div>
-                    <div class="col-md-8">
-                        <h2 id="plotHeader">${movie.Title}</h2>
-                        <ul class="list-group">
-                            <li class="list-group-item"><strong>Genre:</strong> ${movie.Genre}</li>
-                            <li class="list-group-item"><strong>Released:</strong> ${movie.Released}</li>
-                            <li class="list-group-item"><strong>Rated:</strong> ${movie.Rated}</li>
-                            <li class="list-group-item"><strong>IMDB Rating:</strong> ${movie.imdbRating}</li>
-                            <li class="list-group-item"><strong>Director:</strong> ${movie.Director}</li>
-                            <li class="list-group-item"><strong>Writer:</strong> ${movie.Writer}</li>
-                            <li class="list-group-item"><strong>Actors:</strong> ${movie.Actors}</li>
-                            <li class="list-group-item"><strong>Country:</strong> ${movie.Country}</li>
-                        </ul>
-                    </div>
+  //reffered from https://github.com/lukes-code/imdbApi to receive an array of objects
+  const animeByCategories = data.data.reduce((acc, anime)=>{
+
+          const {type} = anime;
+          if(acc[type] === undefined) acc[type] = [];
+          acc[type].push(anime);
+          return acc;
+
+      }, {});
+
+      //reffered from https://github.com/lukes-code/imdbApi to iterate each anime object from an array of objects
+      Object.keys(animeByCategories).map(key=>{
+
+          animeByCategories[key]
+          .map(anime=>{
+                  // isFavourite = films.includes(`${anime.title}`);
+                  // console.log('animeID '+anime.mal_id);// console out anime IDS to deebug
+                  mal_ids.push(anime.mal_id);
+
+    //reffered from https://github.com/lukes-code/imdbApi to create each anime object card; 
+    // output is the card having score; two buttons on hover
+    output +=   `
+    <div class="col-md-3 col-sm-6 col-6 movie-listing">
+
+
+        <div class="well text-center">
+            <div class="anime-title"><h6>${anime.title_english==null?anime.title:anime.title_english}</h6></div>
+            <a onclick="animeSelected('${anime.mal_id}')" href="anime.html" id="goToMovie"><img id="moviePoster" src="${anime.images.jpg.image_url}" alt="${anime.title}"/></a>
+            <div class="middle">
+                <h6 class="search-title">Score: ${anime.score}</h6>
+                <div class = "buttons">
+                  <button id ="BB" class="action_button1" onclick="addGenres('${anime.mal_id}')" href="#" >Add genres to search</button>
+                  <button id ="BB2" class="action_button2" onclick="aniRecommender('${anime.mal_id}','${anime.title}')" href="#" >Recommended Titles</button>
                 </div>
-                <div class="row">
-                <div class="col-md-12">
-                    <h3 id="plot">Plot</h3>
-                    <div class="col-md-12 list-group-item" id="plot">
-                        <p>${movie.Plot}</p>
-                    </div>
-                    <hr>
-                    <a href="http://imdb.com/title/${movie.imdbID}" target="_blank" class="btn btn-primary" id="genBtn">View IMDB</a>
-                    <!--THis looks better underlined-->
-                    <a href="index.html" target="_blank" class="btn btn-primary" id="genBtn">Go back to search</a>
                 </div>
-                </div>
-            `;
-
-            $('#specMovie').html(output);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-}
-
-function getRandomMovie(){
-    let movieId = "tt" + Math.floor(Math.random() * 10000000);
-    console.log(movieId);
-    //only try 10 times to stop infinite loop
-    console.log(randomTry);
-    if(randomTry < 10){
-        axios.get('https://www.omdbapi.com?apiKey=' + apiKey + '&i=' + movieId)
-            .then((response) => {
-                if(response.data.Response == 'True'){
-                    console.log(response);
-                    let movie = response.data;
-
-                    let output = `
-                        <div class="row">
-                            <div class="col-md-12">
-                                <a href='javascript:getRandomMovie()' class="try-again-btn"><h3>Try again?</h3></a>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <img src="${movie.Poster}" alt="${movie.Title}" class="thumbnail"/>
-                            </div>
-                            <div class="col-md-8">
-                                <h2>${movie.Title}</h2>
-                                <ul class="list-group">
-                                    <li class="list-group-item"><strong>Genre:</strong> ${movie.Genre}</li>
-                                    <li class="list-group-item"><strong>Released:</strong> ${movie.Released}</li>
-                                    <li class="list-group-item"><strong>Rated:</strong> ${movie.Rated}</li>
-                                    <li class="list-group-item"><strong>IMDB Rating:</strong> ${movie.imdbRating}</li>
-                                    <li class="list-group-item"><strong>Director:</strong> ${movie.Director}</li>
-                                    <li class="list-group-item"><strong>Writer:</strong> ${movie.Writer}</li>
-                                    <li class="list-group-item"><strong>Actors:</strong> ${movie.Actors}</li>
-                                    <li class="list-group-item"><strong>Country:</strong> ${movie.Country}</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="row">
-                        <div class="well">
-                            <h3>Plot</h3>
-                            <div class="co-md-12 list-group-item">
-                                <p>${movie.Plot}</p>
-                            </div>
-                            <hr>
-                            <a href="http://imdb.com/title/${movie.imdbID}" target="_blank" class="btn btn-primary">View IMDB</a>
-                            <a href="index.html" class="btn btn-default">Go back to search</a>
-                        </div>
-                        </div>
-                    `;
-
-                    $('#movie').html(output);
-                } else {
-                    randomTry++;
-                    getRandomMovie();
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    } else {
-        let output = `
-        <div class="row">
-            <div class="col-md-12">
-                <h3>Could not find anything. <a href='javascript:javascript:getRandomMovie()' class="try-again-btn">Try again?</a></h3>
-                <a href="index.html" class="btn btn-default">Go back to search</a>
             </div>
         </div>
-        `   
-        $('#movie').html(output);
-    }
+        `;
+
+                      }
+              )});
+
+          console.log('IDs: '+mal_ids);
+
+
+          $('#movies').html(output);
+
+
 }
 
-//Global film array for my favourites
-let films = [];
-let films_serialized = JSON.stringify(films);
-localStorage.setItem('films', films_serialized);
+//list for the genre search bar
 
-//Check if film is a favourite or not
-$(document).on("click", '.fa-star', function(){
-    if($(this).attr('id') == 'not-checked'){
-        $(this).removeAttr('id');
-        $(this).attr('id', 'checked');
-        $(this).removeClass('far');
-        $(this).addClass('fas');
-        let title = $(this).closest('.well').find('.search-title').text();
-        films.push(title);
-        $('#favouriteLinks').html('&nbsp;Favourites&nbsp;<i class="fas fa-star" id="default"></i>' + films.length);
-    } else{
-        $(this).removeAttr('id');
-        $(this).attr('id', 'not-checked');
-        $(this).removeClass('fas');
-        $(this).addClass('far');
-        let title = $(this).closest('.well').find('.search-title').text();
-        films = films.filter(e => e !== title);
-        $('#favouriteLinks').html('&nbsp;Favourites<i class="fas fa-star" id="default"></i>' + films.length);
-    }
 
-    if(films.length < 1){
-        $('#favouriteLinks').html('&nbsp;Favourites<i class="fas fa-star" id="default"></i>');
-    }
+let title_trace = ''; // Ensure title_trace is declared in the outer scope
 
+function aniRecommender(id, title) {
+  title_trace = title; // Assign title_trace here
+  fetch(`https://api.jikan.moe/v4/anime/${id}/recommendations`)
+    .then(res => res.json())
+    .then(updateDom4Recomm)
+    .catch(err => console.warn(err.message));
+}
+
+function updateDom4Recomm(data) {
+  let Anime = data.data;
+
+  const animeByCategories = Anime.reduce((acc, animeObj) => {
+    let anime = animeObj.entry;
+    let score = animeObj.votes;
+    const { mal_id, title, images } = anime;
+    anime["votes"] = score;
+    const image_url = images.jpg.image_url;
+    const type = 'recommendations'; // Assuming all are recommendations
+    if (acc[type] === undefined) acc[type] = [];
+    acc[type].push({ mal_id, title, image_url, votes: score }); // Include the votes property
+    return acc;
+  }, {});
+  $('#no-listings').text('');
+  $('#no-listings').removeClass('no-listings');
+  $('#noResult').removeClass('noResult');
+
+  let output = `<div style="width: 100%;"><h4 class="Recomm">Recommendations for ${title_trace}:</h4></div><br/>`;
+  Object.keys(animeByCategories).forEach(key => {
+    animeByCategories[key].forEach(anime => {
+      output += `
+      <div class="col-md-3 col-sm-6 col-6 movie-listing">
+        <div class="well text-center">
+          <div class="anime-title"><h6>${anime.title}</h6></div>
+          <a onclick="animeSelected('${anime.mal_id}')" href="anime.html" id="goToMovie"><img id="moviePoster" src="${anime.image_url}" alt="${anime.title}"/></a>
+          <div class="middle">
+            <h6 class="search-title">Votes: ${anime.votes ? anime.votes : 'N/A'}</h6>
+            <div class="buttons">
+              <button id="BB" class="action_button1" onclick="addGenres('${anime.mal_id}')" href="#">Add genres to search</button>
+              <button id="BB2" class="action_button2" onclick="aniRecommender(${anime.mal_id}, '${anime.title}')" href="#">Recommended Titles</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+    });
   });
 
+  console.log(data.results);
+  $('#movies').html(output);
+}
+
+function animeSelected(id) {
+  sessionStorage.setItem('animeId', id);
+  window.location = 'index.html';
+  return false;
+}
 
 
-//Reset random movie try count
-$(document).on("click", '.try-again-btn', function(){
-    randomTry = 0;
-});
+
+// Use stored mal_id to fetch more details to a new page
+ function getAnimeDetails(){
+     let malId = sessionStorage.getItem('animeId');
+     fetch('https://api.jikan.moe/v4/anime/'+ malId)
+       .then(res=>res.json())
+         .then((response) => {
+             console.log(response);
+             let selected_anime = response.data;
+             let genre_holder = '';
+
+             for(let x = 0; x < selected_anime.genres.length; x++)
+             {
+               genre_holder += selected_anime.genres[x].name;
+               if(x != selected_anime.genres.length -1)
+                  {genre_holder += ', ';}
+             }
+
+             let output = `
+                 <div class="row">
+                     <div class="col-md-4">
+                         <img src="${selected_anime.images.jpg.large_image_url}" alt="${selected_anime.Title}" id="specificPage" class="thumbnail"/>
+                     </div>
+                     <div class="col-md-8">
+                         <ul class="list-group">
+                             <li class="list-group-item"><strong>English Title:</strong> ${selected_anime.title_english}</li>
+                             <li class="list-group-item"><strong>Japanese Title:</strong> ${selected_anime.title_japanese}</li>
+                             <li class="list-group-item"><strong>Type:</strong> ${selected_anime.type}</li>
+                             <li class="list-group-item"><strong>Number of episodes:</strong> ${selected_anime.episodes}</li>
+                             <li class="list-group-item"><strong>Rated:</strong> ${selected_anime.rating}</li>
+                             <li class="list-group-item"><strong>Year of release:</strong> ${selected_anime.aired.prop.from.year}</li>
+
+                             <li class="list-group-item"><strong>User score:</strong> ${selected_anime.score}</li>
+                             <li class="list-group-item"><strong>Genre:</strong> ${genre_holder}</li>
+                         </ul>
+                     </div>
+                 </div>
+                 <div class="row">
+                 <div class="col-md-12">
+                     <h3 id="plot">Plot</h3>
+                     <div class="col-md-12 list-group-item" id="plot">
+                         <p>${selected_anime.synopsis}</p>
+                     </div>
+                     <hr>
+                     <a href="${selected_anime.url}" target="_blank" class="btn btn-primary" id="genBtn">View MAL Page</a>
+
+                    <a href="index.html" target="_blank" class="btn btn-primary" id="genBtn">Go back to search</a>
+                 </div>
+                 </div>
+             `;
+
+             $('#specAnime').html(output);
+         })
+         .catch((err) => {
+             console.log(err);
+         });
+ }
+
+
+
+// REFERENCE: https://github.com/lukes-code/imdbApi
